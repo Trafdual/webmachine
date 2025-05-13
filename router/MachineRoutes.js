@@ -14,7 +14,7 @@ router.post('/postmachine', async (req, res) => {
     }
     const machine = new Machine({
       machine_id,
-      plan: 'Gói Free',
+      plan: 'free',
       note,
       name,
       activate_time: moment_timezone().toDate()
@@ -40,20 +40,30 @@ router.get('/getmachine', async (req, res) => {
       .select('_id machine_id plan activate_time expire_time note name count')
       .lean()
 
-    const machinejson = machines.map(mc => ({
-      _id: mc._id,
-      machine_id: mc.machine_id,
-      plan: mc.plan,
-      activate_time: mc.activate_time
-        ? moment(mc.activate_time).format('DD/MM/YYYY HH:mm')
-        : null,
-      expire_time: mc.expire_time
-        ? moment(mc.expire_time).format('DD/MM/YYYY HH:mm')
-        : null,
-      note: mc.note,
-      name: mc.name,
-      count: mc.count
-    }))
+    const machinejson = machines.map(mc => {
+      const now = moment()
+      const expireMoment = mc.expire_time ? moment(mc.expire_time) : null
+
+      const expiration =
+        expireMoment && expireMoment.isAfter(now)
+          ? expireMoment.diff(now, 'days')
+          : 0
+      return {
+        _id: mc._id,
+        machine_id: mc.machine_id,
+        plan: mc.plan,
+        activate_time: mc.activate_time
+          ? moment(mc.activate_time).format('DD/MM/YYYY HH:mm')
+          : null,
+        expire_time: mc.expire_time
+          ? moment(mc.expire_time).format('DD/MM/YYYY HH:mm')
+          : null,
+        note: mc.note,
+        name: mc.name,
+        count: mc.count,
+        expiration: expiration
+      }
+    })
 
     res.json({
       data: machinejson,
@@ -74,10 +84,10 @@ router.post('/updatemachine/:idmachine', async (req, res) => {
     const machine = await Machine.findById(req.params.idmachine)
 
     switch (plan) {
-      case 'Gói Tháng':
+      case 'month':
         expire_time = moment(machine.activate_time).add(30, 'days').toDate()
         break
-      case 'Gói Vĩnh Viễn':
+      case 'unlimit':
         expire_time = moment(machine.activate_time).add(100, 'years').toDate()
         break
       default:
@@ -121,6 +131,15 @@ router.get('/getdetailmachine/:machine_id', async (req, res) => {
         error: 'Thiết bị không tồn tại'
       })
     }
+    const now = moment()
+    const expireMoment = machine.expire_time
+      ? moment(machine.expire_time)
+      : null
+
+    const expiration =
+      expireMoment && expireMoment.isAfter(now)
+        ? expireMoment.diff(now, 'days')
+        : 0
     const machinejson = {
       machine_id: machine.machine_id,
       plan: machine.plan,
@@ -132,7 +151,8 @@ router.get('/getdetailmachine/:machine_id', async (req, res) => {
         : null,
       note: machine.note,
       name: machine.name,
-      count: machine.count
+      count: machine.count,
+      expiration:expiration
     }
     res.json(machinejson)
   } catch (error) {
