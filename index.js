@@ -46,8 +46,8 @@ app.use(
 app.use(cors())
 app.use(express.static(path.join(__dirname, '/uploads')))
 
-app.use('/', machineroutes)
-app.use('/', banggia)
+app.use('/api', machineroutes)
+app.use('/api', banggia)
 
 app.listen(3090, () => {
   try {
