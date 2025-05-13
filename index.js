@@ -8,6 +8,7 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const MongoStore = require('connect-mongo')
 const machineroutes = require('./router/MachineRoutes')
+const banggia = require('./router/BangGiaRoutes')
 
 var app = express()
 app.use(methodOverride('_method'))
@@ -46,6 +47,7 @@ app.use(cors())
 app.use(express.static(path.join(__dirname, '/uploads')))
 
 app.use('/', machineroutes)
+app.use('/', banggia)
 
 app.listen(3090, () => {
   try {
