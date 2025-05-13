@@ -79,7 +79,7 @@ router.get('/getmachine', async (req, res) => {
 
 router.post('/updatemachine/:idmachine', async (req, res) => {
   try {
-    const { plan } = req.body
+    const { plan, name, note } = req.body
     let expire_time = null
     const machine = await Machine.findById(req.params.idmachine)
 
@@ -96,6 +96,12 @@ router.post('/updatemachine/:idmachine', async (req, res) => {
     }
 
     machine.plan = plan
+    if(name){
+      machine.name = name
+    }
+    if(note){
+      machine.note = note
+    }
     machine.expire_time = expire_time
     await machine.save()
     res.json(machine)
