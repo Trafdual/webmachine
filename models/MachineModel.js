@@ -1,3 +1,4 @@
+const {min}=require('date-fns')
 const mongoose = require('mongoose')
 
 const machineSchema = new mongoose.Schema({
@@ -7,7 +8,7 @@ const machineSchema = new mongoose.Schema({
   expire_time: { type: Date, default: null },
   note: { type: String },
   name: { type: String },
-  count: { type: Number, default: 10 }
+  count: { type: Number, default: 1 }
 })
 
 const machine = mongoose.model('machine', machineSchema)

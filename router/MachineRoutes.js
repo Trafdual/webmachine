@@ -152,7 +152,7 @@ router.get('/getdetailmachine/:machine_id', async (req, res) => {
       note: machine.note,
       name: machine.name,
       count: machine.count,
-      expiration:expiration
+      expiration: expiration
     }
     res.json(machinejson)
   } catch (error) {
@@ -169,7 +169,10 @@ router.post('/exceptcount/:machine_id', async (req, res) => {
         error: 'Thiết bị không tồn tại'
       })
     }
-    machine.count = machine.count - 1
+    if (machine.count > 0) {
+      machine.count = machine.count - 1
+    }
+
     await machine.save()
     res.json(machine)
   } catch (error) {
