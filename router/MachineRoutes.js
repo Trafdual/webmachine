@@ -96,15 +96,26 @@ router.post('/updatemachine/:idmachine', async (req, res) => {
     }
 
     machine.plan = plan
-    if(name){
+    if (name) {
       machine.name = name
     }
-    if(note){
+    if (note) {
       machine.note = note
     }
     machine.expire_time = expire_time
     await machine.save()
     res.json(machine)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+router.post('/deletemachine/:idmachine', async (req, res) => {
+  try {
+    const idmachine = req.params.idmachine
+    await Machine.findByIdAndDelete(idmachine)
+
+    res.json({ message: 'xóa thành công' })
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
