@@ -52,8 +52,7 @@ router.get('/getmachine', async (req, res) => {
         : null,
       note: mc.note,
       name: mc.name,
-      count: mc.count,
-      
+      count: mc.count
     }))
 
     res.json({
@@ -136,6 +135,23 @@ router.get('/getdetailmachine/:machine_id', async (req, res) => {
       count: machine.count
     }
     res.json(machinejson)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+router.post('/exceptcount/:machine_id', async (req, res) => {
+  try {
+    const machine_id = req.params.machine_id
+    const machine = await Machine.findOne({ machine_id })
+    if (!machine) {
+      return res.status(400).json({
+        error: 'Thiết bị không tồn tại'
+      })
+    }
+    machine.count = machine.count - 1
+    await machine.save()
+    res.json(machine)
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
