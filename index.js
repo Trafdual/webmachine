@@ -1,58 +1,51 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const bodyParser = require('body-parser')
-const session = require('express-session')
-const methodOverride = require('method-override')
-const path = require('path')
+const dotenv = require('dotenv')
 const cors = require('cors')
-const cookieParser = require('cookie-parser')
-const MongoStore = require('connect-mongo')
-const machineroutes = require('./router/MachineRoutes')
-const banggia = require('./router/BangGiaRoutes')
 
-var app = express()
-app.use(methodOverride('_method'))
+dotenv.config()
 
-const uri =
-  'mongodb+srv://totnghiepduan2023:webmachine123@cluster0.tzx1qqh.mongodb.net/webmachine?retryWrites=true&w=majority&appName=webmachine'
+const app = express()
+app.use(express.json())
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://hieuphungfpt.sbs',
+  'https://api.hieuphungfpt.sbs'
+]
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true)
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true)
+      } else {
+        return callback(new Error('Not allowed by CORS'))
+      }
+    },
+    methods: ['GET', 'POST'],
+    credentials: true
+  })
+)
+
 
 mongoose
-  .connect(uri, {
+  .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
-  .then(console.log('kết nối thành công'))
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err))
 
-const mongoStoreOptions = {
-  mongooseConnection: mongoose.connection,
-  mongoUrl: uri,
-  collection: 'sessions'
-}
-
-app.use(cookieParser())
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(
-  session({
-    secret: 'mysecretkey',
-    resave: false,
-    saveUninitialized: true,
-    store: MongoStore.create(mongoStoreOptions),
-    cookie: {
-      secure: false
-    }
-  })
-)
-app.use(cors())
-app.use(express.static(path.join(__dirname, '/uploads')))
-
-app.use('/api', machineroutes)
-app.use('/api', banggia)
-
-app.listen(3090, () => {
-  try {
-    console.log('kết nối thành công 3090')
-  } catch (error) {
-    console.log('kết nối thất bại 3090', error)
-  }
+app.get('/', (req, res) => {
+  res.send('Welcome to User and Plan Management Backend!')
 })
+
+const userRoutes = require('./routes/users')
+app.use('/api/users', userRoutes)
+
+const planRoutes = require('./routes/plans')
+app.use('/api/plans', planRoutes)
+
+const PORT = process.env.PORT || 3090
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
