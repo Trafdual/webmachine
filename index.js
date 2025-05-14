@@ -37,7 +37,7 @@ mongoose
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err))
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('Welcome to User and Plan Management Backend!')
 })
 
